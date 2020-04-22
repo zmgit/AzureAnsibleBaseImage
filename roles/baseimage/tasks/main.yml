@@ -1,0 +1,72 @@
+---
+- name: Create a resource group
+  azure_rm_resourcegroup:
+    name: "{{ resource_group_name }}"
+    location: "{{ location }}"
+    tags:
+      env: Test
+
+- name: Create virtual network
+  azure_rm_virtualnetwork:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ vnet_name }}"
+    address_prefixes: "{{ vnet_address_prefixes }}"
+
+- name: Create subnet
+  azure_rm_subnet:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ subnet_name }}"
+    address_prefix: "{{ subnet_addess_prefixes }}"
+    virtual_network: "{{ vnet_name }}"
+
+- name: Create public IP address
+  azure_rm_publicipaddress:
+    resource_group: "{{ resource_group_name }}"
+    allocation_method: Static
+    name: "{{ public_ip_name }}"
+
+- name: Create virtual network inteface card
+  azure_rm_networkinterface:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ network_interface_name }}"
+    virtual_network: "{{ vnet_name }}"
+    subnet: "{{ subnet_name }}"
+    enable_accelerated_networking: "{% if vm_size in accelerated_networking_shapes %}yes{% else %}no{% endif %}"
+
+- name: Create VM 
+  azure_rm_virtualmachine:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ vm_name }}"
+    admin_username: "{{ admin_username }}"
+    admin_password: "{{ admin_password }}"
+    vm_size: "{{ vm_size }}"
+    network_interfaces: "{{ network_interface_name }}"
+    image:
+      offer: RHEL
+      publisher: RedHat
+      sku: 7.7
+      version: latest
+
+- name: Create VM Extension
+  azure_rm_virtualmachineextension:
+    resource_group: "{{ resource_group_name }}"
+    name: testVMExtension
+    virtual_machine_name: "{{ vm_name }}"
+    publisher: Microsoft.Azure.Extensions
+    virtual_machine_extension_type: CustomScript
+    type_handler_version: "2.0"
+    auto_upgrade_minor_version: true
+    settings: {"commandToExecute": "echo $(date) > ~/notes.txt"}
+
+- name: Generalize VM 
+  azure_rm_virtualmachine:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ vm_name }}"
+    state: present 
+    generalized: yes
+
+- name: Create an image from a virtual machine
+  azure_rm_image:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ vm_image_name }}"
+    source: "{{ vm_name }}"

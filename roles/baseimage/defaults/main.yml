@@ -1,0 +1,14 @@
+resource_group_name: "myRG1"
+vnet_name: "vnet1"
+vnet_address_prefixes: "10.0.0.0/16"
+subnet_name: "sbnt1"
+subnet_addess_prefixes: "10.0.1.0/24"
+public_ip_name: "vm-pubip"
+vm_size: "Standard_D4s_v3"  # Standard_D4s_v3, Standard_D8s_v3 , Standard_F72s_v2, Standard_HC44rs, Standard_M64s Standard_M64ms, Standard_E4s_v3, Standard_E4s_E8s_v3
+vm_name: "sourceVmImage"
+network_interface_name: "sourceVmImage-nic1"
+vm_image_name: "baseVmImage"
+location: "eastus"
+admin_username: "azureuser"
+admin_password: "v2BjgcAsR1IqGq!"
+accelerated_networking_shapes: ["Standard_D4s_v3", "Standard_D8s_v3", "Standard_F72s_v2", "Standard_M64s", "Standard_M64ms", "Standard_E4s_v3", "Standard_E4s_E8s_v3"]
